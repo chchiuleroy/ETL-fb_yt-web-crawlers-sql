@@ -26,7 +26,6 @@ def url_get():
     rs = conn.execute('SELECT * FROM poster_info')
     row = [j for j in rs]
     need = pd.DataFrame(row)
-    # need.columns
     url = need.iloc[:, 5]
     return url, need, conn, user_table
 
@@ -39,8 +38,8 @@ temp = url[yt>-1]
 account = temp.str.split('/').str[4]
 url[yt>-1] = ['https://www.youtube.com/watch?v=' + account.iloc[i] + '&feature=emb_title' for i in range(len(temp))]
 
-s1 = 'CHBHLCBGEGBHEGHDFDEDMDFECHAHLGBGAGHHIGEGLGBHNGKGIGFHGHKGLGLCGGKGIG'
-s2 = 'IEEGHHGGNGHDFDHDFDEC'
+s1 = '' ## insert your account of encrypted for fb& yt
+s2 = '' ## insert your password of encrypted for fb& yt
 
 def decrypt(key, s): 
     code = 'gbk'
@@ -71,12 +70,6 @@ def get_fb_like(url):
     options.add_experimental_option('prefs', prefs)
     options.add_argument('--disable-popup-blocking')
     options.add_argument('disable-infobars') 
-    # options.binary_location = os.environ.get('GOOGLE_CHROME_BIN')
-    # options.add_argument('--headless') #無頭模式
-    # options.add_argument('--disable-dev-shm-usage')
-    # options.add_argument('--no-sandbox')
-    
-    # browser = webdriver.Chrome(executable_path=os.environ.get('CHROMEDRIVER_PATH'), chrome_options = options)
     browser = webdriver.Chrome(chrome_options = options)
     browser.set_window_size(1920, 800)
     browser.get('http://www.facebook.com')
@@ -109,12 +102,12 @@ def get_yt_like(html):
     options.add_argument('disable-infobars') 
     
     browser = webdriver.Chrome(options = options)
-    # browser.implicitly_wait(30) 
+    browser.implicitly_wait(10) 
     browser.set_window_size(1920, 800)
     def get_like(html):
         try:
             browser.get(html)
-            time.sleep(2)
+            time.sleep(5)
             x_path = "//div[@id='menu-container']/div/ytd-menu-renderer/div/ytd-toggle-button-renderer[1]/a/yt-formatted-string"
             nice_count = browser.find_element_by_xpath(x_path).text
         except:
@@ -130,19 +123,10 @@ yt_likes = get_yt_like(url[yt>-1])
 likes = pd.Series(['']*len(url))
 likes[fb>-1] = fb_likes
 likes[yt>-1] = yt_likes
-# url[likes==''].tolist()
-likes[15] = 94
-likes[16] = 0
-likes[17] = 112
-likes[18] = 0
-likes[23] = 0
-likes[38] = 2
-# likes[21] = 0
 f = likes.astype(int).tolist()
 print(f)
 uid = need.iloc[:, 0].tolist()
 for j in range(len(f)):
     user_table.update().where(user_table.c.uid == uid[j]).values({'likes_count': f[j]}).execute()
 del j
-# user_table.delete().where(user_table.c.likes_count == 3).execute()
 conn.close()
